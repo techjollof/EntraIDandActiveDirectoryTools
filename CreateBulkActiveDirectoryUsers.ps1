@@ -3,11 +3,37 @@ Import-Module ActiveDirectory
 
 # Define UPN and OU
 $UPN = "itpro.work.gd"
-$OuPath = "CN=Dani,CN=Users,DC=ITPH,DC=lab"
-$Password = $((Write-Host "`n>> Enter the password to create users : "-ForegroundColor yellow -NoNewLine );Read-Host)
+$OuPath = "CN=Dani,CN=Users,DC=ITPH,DC=lab" #$((Write-Host "`n>> Specify the Organization Unit (OU) : "-ForegroundColor yellow -NoNewLine );Read-Host)
 
 # Store the data from NewUsersFinal.csv in the $ADUsers variable
 $ADUsers = Import-Csv .\SampleUsersToBeCreated.csv ";"
+
+$addressFormatInfo =@"
+
+    Exampled user FirstName = Alex and LastName = Fox and domain = JesusLovesYou.com
+
+    1 - alex.fox@JesusLovesYou.com
+    2 - a.fox@JesusLovesYou.com
+    3 - afox@JesusLovesYou.com
+    4 - fox.alex@JesusLovesYou.com
+    5 - f.alex@JesusLovesYou.com
+    6 - falex@JesusLovesYou.com
+
+"@
+
+
+
+# Password for user creation
+$Password = $((Write-Host "`n>> Enter the password to create users : "-ForegroundColor yellow -NoNewLine );Read-Host)
+
+# Define the eamil address forrmat to use if address formate is worng or invalid
+Write-Host "`n############## Choose user address format ############`n $addressFormatInfo"
+$addressFormat = $((Write-Host "`n>> Chose UserPrincipalName format incase of invalid address : "-ForegroundColor yellow -NoNewLine );Read-Host)
+
+
+#Same address for UPN and Eamil
+$upnEqSMTP = $((Write-Host "`n>> Do you want the same address for UserPrincipalName (login) or Primary Email Address [Yes(Y)/No(N)? "-ForegroundColor yellow -NoNewLine );Read-Host)
+
 
 # Loop through each row containing user details in the CSV file
 foreach ($User in $ADUsers) {
@@ -16,12 +42,12 @@ foreach ($User in $ADUsers) {
     $UserInfo = @{
         Name = "$($User.firstname +"."+ $User.lastname)"
         SamAccountName = "$($User.firstname +"."+ $User.lastname)"
-        UserPrincipalName = $(if($null -eq $User.mail){"$($User.firstname +"."+ $User.lastname)@$UPN"} else {$User.email})
+        UserPrincipalName = $(if($null -eq $User.email){"$($User.firstname +"."+ $User.lastname)@$UPN"} else {$User.email})
         GivenName = $User.firstname
         Surname = $User.lastname
         Initials = $User.initials
         Path = $OuPath #This field refers to the OU the user account is to be created in
-        EmailAddress = $(if($null -eq $User.mail){"$($User.firstname +"."+ $User.lastname)@$UPN"} else {$User.email})
+        EmailAddress = $(if($null -eq $User.email){"$($User.firstname +"."+ $User.lastname)@$UPN"} else {$User.email})
         City = $User.city
         PostalCode = $User.zipcode
         State = $User.state
@@ -35,8 +61,6 @@ foreach ($User in $ADUsers) {
         ChangePasswordAtLogon = $True
         AccountPassword = (ConvertTo-secureString $Password -AsPlainText -Force)
     }
-
-    $UserInfo
 }
 
     # Check to see if the user already exists in AD
