@@ -1,0 +1,3 @@
+FirstName;Initials;Lastname;Username;Email;StreetAddress;City;ZipCode;State;Country;Department;Password;Telephone;JobTitle;Company;OU
+Max;MF;Fraser;Max.Fraser;;21 Baker St;London;NW1 6XE;;GB;IT;;+44123456780;Engineer;ASUsers;
+Piers;PB;Bower;Piers.Bower;Piers@itpro.work.gd;21 Baker St;London;NW1 6XE;;GB;IT;;+44123456781;Manager;ASUsers;
