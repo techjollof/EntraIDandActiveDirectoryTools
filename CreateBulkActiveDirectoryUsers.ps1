@@ -2,7 +2,7 @@
 Import-Module ActiveDirectory
 
 # Define UPN and OU
-$UPN = "itpro.work.gd"
+$Domain = "itpro.work.gd"
 $OuPath = "CN=Dani,CN=Users,DC=ITPH,DC=lab" #$((Write-Host "`n>> Specify the Organization Unit (OU) : "-ForegroundColor yellow -NoNewLine );Read-Host)
 
 # Store the data from NewUsersFinal.csv in the $ADUsers variable
@@ -22,7 +22,6 @@ $addressFormatInfo =@"
 "@
 
 
-
 # Password for user creation
 $Password = $((Write-Host "`n>> Enter the password to create users : "-ForegroundColor yellow -NoNewLine );Read-Host)
 
@@ -30,9 +29,28 @@ $Password = $((Write-Host "`n>> Enter the password to create users : "-Foregroun
 Write-Host "`n############## Choose user address format ############`n $addressFormatInfo"
 $addressFormat = $((Write-Host "`n>> Chose UserPrincipalName format incase of invalid address : "-ForegroundColor yellow -NoNewLine );Read-Host)
 
-
 #Same address for UPN and Eamil
-$upnEqSMTP = $((Write-Host "`n>> Do you want the same address for UserPrincipalName (login) or Primary Email Address [Yes(Y)/No(N)? "-ForegroundColor yellow -NoNewLine );Read-Host)
+$upnEqSMTP = $((Write-Host "`n>> Do you want the same address for UserPrincipalName (login) or Primary Email (SMTP) Address [Yes(Y)/No(N)? "-ForegroundColor yellow -NoNewLine );Read-Host)
+if ($upnEqSMTP -in "Yes,Y".Split(",")){
+    $PrimaryEmailAddress =
+}else {
+    Write-Host "`n############## Choose user address format Primary Email(SMTP) Address ############`n $addressFormatInfo"
+    $addressFormat = $((Write-Host "`n>> Chose Primary Email(SMTP) Address format : "-ForegroundColor yellow -NoNewLine );Read-Host)
+
+}
+function CrateAddress ($choice, $firstName, $lastName) {
+    switch ($addressFormat) {
+        1 { $UPNorSMTPAddress = "$($firstName+"."+$lastName)@$Domain"; break }
+        2 { $UPNorSMTPAddress = "$($firstName[0]+"."+$lastName)@$Domain"; break }
+        3 { $UPNorSMTPAddress = "$($firstName[0]+$lastName)@$Domain"; break }
+        4 { $UPNorSMTPAddress = "$($lastName+"."+$firstName)@$Domain"; break }
+        5 { $UPNorSMTPAddress = "$($lastName[0]+"."+$firstName)@$Domain"; break }
+        6 { $UPNorSMTPAddress = "$($lastName[0]+$firstName)@$Domain"; break }
+    }
+    
+    return $UPNorSMTPAddress
+}
+
 
 
 # Loop through each row containing user details in the CSV file
@@ -42,7 +60,7 @@ foreach ($User in $ADUsers) {
     $UserInfo = @{
         Name = "$($User.firstname +"."+ $User.lastname)"
         SamAccountName = "$($User.firstname +"."+ $User.lastname)"
-        UserPrincipalName = $(if($null -eq $User.email){"$($User.firstname +"."+ $User.lastname)@$UPN"} else {$User.email})
+        UserPrincipalName = $(if($null -eq $User.email){"$($User.firstname +"."+ $User.lastname)@$Domain"} else {$User.email})
         GivenName = $User.firstname
         Surname = $User.lastname
         Initials = $User.initials
