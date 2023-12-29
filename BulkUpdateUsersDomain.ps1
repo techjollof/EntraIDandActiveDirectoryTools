@@ -20,8 +20,8 @@ $ActiveUsers | % {
         Write-host "User $($ActiveUsers.EmailAddress) does not have SMTP address type, not action is taken but stop the script and uncommnent the below line by removing # "
 
         #################   uncommend this if you want to force add the address ##################
-        #$newProxy = "SMTP:"+$ActiveUsers.SamAccountName+$newdomain
-        #Set-ADUser $ActiveUsers.SamAccountName -add @{ProxyAddresses= "$newProxy"} -EmailAddress $newProxy.split(':')[1]
+        $newProxy = "SMTP:"+$ActiveUsers.SamAccountName+$newdomain
+        Set-ADUser $ActiveUsers.SamAccountName -add @{ProxyAddresses= "$newProxy"} -EmailAddress $newProxy.split(':')[1]
 
 
     }else{
